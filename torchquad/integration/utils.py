@@ -9,12 +9,12 @@ def _linspace_with_grads(start, stop, N, requires_grad):
     """Creates an equally spaced 1D grid while keeping gradients
     in regard to inputs.
     Args:
-        start (e.g. torch.tensor): Start point (inclusive).
-        stop (e.g. torch.tensor): End point (inclusive).
-        N (e.g. torch.tensor): Number of points.
+        start (backend tensor): Start point (inclusive).
+        stop (backend tensor): End point (inclusive).
+        N (backend tensor): Number of points.
         requires_grad (bool): Indicates if output should be recorded for backpropagation.
     Returns:
-        e.g. torch.tensor: Equally spaced 1D grid
+        backend tensor: Equally spaced 1D grid
     """
     if requires_grad:
         # Create 0 to 1 spaced grid
@@ -29,13 +29,13 @@ def _linspace_with_grads(start, stop, N, requires_grad):
         return anp.linspace(start, stop, N, like=start)
 
 
-def _setup_integration_domain(dim, integration_domain, backend):
+def _setup_integration_domain(dim, integration_domain):
     """Sets up the integration domain if unspecified by the user.
     Args:
         dim (int): Dimensionality of the integration domain.
-        integration_domain (list, optional): Integration domain, e.g. [[-1,1],[0,1]]. Defaults to [-1,1]^dim.
+        integration_domain (list or backend tensor, optional): Integration domain, e.g. [[-1,1],[0,1]]. Defaults to [-1,1]^dim. It also determines the numerical backend (if it is a list, the backend is "torch").
     Returns:
-        e.g. torch.tensor: Integration domain.
+        backend tensor: Integration domain.
     """
 
     # Store integration_domain
@@ -46,10 +46,8 @@ def _setup_integration_domain(dim, integration_domain, backend):
             raise ValueError(
                 "Dimension and length of integration domain don't match. Should be e.g. dim=1 dom=[[-1,1]]."
             )
-        # TODO: What if backend is None but a default backend is set for autoray?
-        if infer_backend(integration_domain) == backend:
-            return integration_domain
-        else:
-            return anp.array(integration_domain, like=backend)
+        if infer_backend(integration_domain) == "builtins":
+            return anp.array(integration_domain, like="torch")
+        return integration_domain
     else:
-        return anp.array([[-1, 1]] * dim, like=backend)
+        return anp.array([[-1, 1]] * dim, like="torch")
