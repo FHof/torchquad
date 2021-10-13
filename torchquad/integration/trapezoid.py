@@ -1,4 +1,4 @@
-import torch
+from autoray import numpy as anp
 from loguru import logger
 
 from .base_integrator import BaseIntegrator
@@ -7,12 +7,12 @@ from .utils import _setup_integration_domain
 
 
 class Trapezoid(BaseIntegrator):
-    """Trapezoidal rule in torch. See https://en.wikipedia.org/wiki/Newton%E2%80%93Cotes_formulas#Closed_Newton%E2%80%93Cotes_formulas ."""
+    """Trapezoidal rule. See https://en.wikipedia.org/wiki/Newton%E2%80%93Cotes_formulas#Closed_Newton%E2%80%93Cotes_formulas ."""
 
     def __init__(self):
         super().__init__()
 
-    def integrate(self, fn, dim, N=1000, integration_domain=None):
+    def integrate(self, fn, dim, N=1000, integration_domain=None, backend="torch"):
         """Integrates the passed function on the passed domain using the trapezoid rule.
 
         Args:
@@ -20,11 +20,12 @@ class Trapezoid(BaseIntegrator):
             dim (int): Dimensionality of the function to integrate.
             N (int, optional): Total number of sample points to use for the integration. Defaults to 1000.
             integration_domain (list, optional): Integration domain, e.g. [[-1,1],[0,1]]. Defaults to [-1,1]^dim.
+            backend (string): Numerical backend, e.g. "numpy". Defaults to "torch".
 
         Returns:
             float: integral value
         """
-        self._integration_domain = _setup_integration_domain(dim, integration_domain)
+        self._integration_domain = _setup_integration_domain(dim, integration_domain, backend=backend)
         self._check_inputs(dim=dim, N=N, integration_domain=self._integration_domain)
 
         logger.debug(
@@ -39,7 +40,7 @@ class Trapezoid(BaseIntegrator):
         self._fn = fn
 
         # Create grid and assemble evaluation points
-        self._grid = IntegrationGrid(N, self._integration_domain)
+        self._grid = IntegrationGrid(N, self._integration_domain, backend=backend)
 
         logger.debug("Evaluating integrand on the grid.")
         function_values = self._eval(self._grid.points)
@@ -60,7 +61,7 @@ class Trapezoid(BaseIntegrator):
                 / 2.0
                 * (cur_dim_areas[..., 0:-1] + cur_dim_areas[..., 1:])
             )
-            cur_dim_areas = torch.sum(cur_dim_areas, dim=dim - cur_dim - 1)
+            cur_dim_areas = anp.sum(cur_dim_areas, axis=dim - cur_dim - 1)
 
         logger.info("Computed integral was " + str(cur_dim_areas) + ".")
 

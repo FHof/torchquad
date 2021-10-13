@@ -1,5 +1,6 @@
 import warnings
-import torch
+from autoray import numpy as anp
+from autoray import infer_backend
 from loguru import logger
 
 
@@ -30,15 +31,15 @@ class BaseIntegrator:
         """Evaluates the function at the passed points and updates nr_of_evals
 
         Args:
-            points (torch.tensor): Integration points
+            points (e.g. torch.tensor): Integration points
         """
         self._nr_of_fevals += len(points)
         result = self._fn(points)
-        if type(result) != torch.Tensor:
+        if infer_backend(result) != infer_backend(points):
             warnings.warn(
-                "The passed function did not return a torch.tensor. Will try to convert. Note that this may be slow as it results in memory transfers between CPU and GPU, if torchquad uses the GPU."
+                "The passed function's return value has a different numerical backend than the passed points. Will try to convert. Note that this may be slow as it results in memory transfers between CPU and GPU, if torchquad uses the GPU."
             )
-            result = torch.tensor(result)
+            result = anp.array(result, like=points)
 
         if len(result) != len(points):
             raise ValueError(

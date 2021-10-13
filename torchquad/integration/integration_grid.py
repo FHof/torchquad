@@ -1,4 +1,4 @@
-import torch
+from autoray import numpy as anp
 from time import perf_counter
 from loguru import logger
 
@@ -14,12 +14,13 @@ class IntegrationGrid:
     _dim = None  # dimensionality of the grid
     _runtime = None  # runtime for the creation of the integration grid
 
-    def __init__(self, N, integration_domain):
+    def __init__(self, N, integration_domain, backend="torch"):
         """Creates an integration grid of N points in the passed domain. Dimension will be len(integration_domain)
 
         Args:
             N (int): Total desired number of points in the grid (will take next lower root depending on dim)
             integration_domain (list): Domain to choose points in, e.g. [[-1,1],[0,1]].
+            backend (string): The numerical backend for which the grid is created
         """
         start = perf_counter()
         self._check_inputs(N, integration_domain)
@@ -31,7 +32,7 @@ class IntegrationGrid:
         # i.e. int(3.99999...) -> 3, a little error term is useful
         self._N = int(N ** (1.0 / self._dim) + 1e-8)  # convert to points per dim
 
-        self.h = torch.zeros([self._dim])
+        self.h = anp.zeros([self._dim], like=backend)
 
         logger.debug(
             "Creating "
@@ -64,8 +65,8 @@ class IntegrationGrid:
         logger.debug("Grid mesh width is " + str(self.h))
 
         # Get grid points
-        points = torch.meshgrid(*grid_1d)
-        self.points = torch.stack(list(map(torch.ravel, points)), dim=1)
+        points = anp.meshgrid(*grid_1d)
+        self.points = anp.stack(list(map(anp.ravel, points)), axis=1, like=backend)
 
         logger.info("Integration grid created.")
 
