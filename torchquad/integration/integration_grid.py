@@ -68,7 +68,9 @@ class IntegrationGrid:
 
         # Get grid points
         points = anp.meshgrid(*grid_1d)
-        self.points = anp.stack(list(map(anp.ravel, points)), axis=1, like=integration_domain)
+        self.points = anp.stack(
+            list(map(anp.ravel, points)), axis=1, like=integration_domain
+        )
 
         logger.info("Integration grid created.")
 
