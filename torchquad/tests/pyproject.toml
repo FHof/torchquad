@@ -1,0 +1,7 @@
+[tool.pytest.ini_options]
+filterwarnings = [
+    'ignore:the imp module is deprecated:DeprecationWarning',
+    'ignore:`np\.object` is a deprecated:DeprecationWarning',
+    'ignore:`np\.bool` is a deprecated:DeprecationWarning',
+    'ignore:`np\.int` is a deprecated:DeprecationWarning',
+]
