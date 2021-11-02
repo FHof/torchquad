@@ -14,3 +14,8 @@ dependencies:
 - sphinx>=3.4.3
 - sphinx_rtd_theme>=0.5.1
 - tqdm>=4.56.0
+- pip
+- pip:
+  - --find-links https://storage.googleapis.com/jax-releases/jax_releases.html
+  - jax[cuda]>=0.2.22
+  - tensorflow>=2.6.0
