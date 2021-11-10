@@ -1,7 +1,7 @@
 from loguru import logger
 
 
-def set_precision_torch(data_type="float"):
+def _set_precision_torch(data_type="float"):
     """This function allows the user to set the default precision for torch.
     Call before declaring your variables.
 
@@ -63,7 +63,7 @@ def set_precision(data_type="float", backend="torch"):
         backend (string, optional): Numerical backend for which the data type is changed. Defaults to "torch".
     """
     if backend == "torch":
-        set_precision_torch(data_type)
+        _set_precision_torch(data_type)
     elif backend == "jax":
         from jax.config import config
 
