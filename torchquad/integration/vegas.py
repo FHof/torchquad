@@ -56,7 +56,7 @@ class VEGAS(BaseIntegrator):
             backend (string, optional): Numerical backend. This argument is ignored if the backend can be inferred from integration_domain. "jax" and "tensorflow" are unsupported. Defaults to "torch".
 
         Raises:
-            ValueError: If len(integration_domain) != dim
+            ValueError: If the integration_domain or backend argument is invalid
 
         Returns:
             float: Integral value
@@ -86,6 +86,8 @@ class VEGAS(BaseIntegrator):
             dim, integration_domain, backend
         )
         self.backend = infer_backend(integration_domain)
+        if self.backend in ["jax", "tensorflow"]:
+            raise ValueError(f"Unsupported numerical backend: {self.backend}")
         self.dtype = integration_domain.dtype
         self.rng = RNG(backend=self.backend, seed=seed)
 
