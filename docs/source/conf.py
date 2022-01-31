@@ -68,3 +68,12 @@ html_theme_options = {
 # html_static_path = ["_static"]
 
 # -- Extension configuration -------------------------------------------------
+
+# Use a vectorgraphic format for math formulas so that they look sharp even if a
+# browser zoom is set.
+imgmath_image_format = "svg"
+imgmath_font_size = 14
+
+# imgmath recommends to set this to True, but it breaks the high-dimensional
+# integral formula
+# imgmath_use_preview = True
