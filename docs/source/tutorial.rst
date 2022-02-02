@@ -96,7 +96,7 @@ the following way:
 -  Example integration in ten dimensions (10-D) with PyTorch
 -  Some accuracy / runtime comparisons with scipy
 -  Example gradient calculation with PyTorch
--  Compilation methods to speed up the integration
+-  Methods to speed up the integration
 
 Feel free to test the code on your own computer as we go along.
 
@@ -503,8 +503,11 @@ The output of the code is as follows:
             Method: <torchquad.integration.trapezoid.Trapezoid object at 0x7f724735b6d0> Gradients: tensor([[-2.0000,  2.0000]])
 
 
+Speedups for repeated quadrature
+--------------------------------
+
 Compiling the integrate method
-------------------------------
+``````````````````````````````
 
 To speed up the quadrature in situations where it is executed often with the
 same number of points ``N`` and dimensionality ``dim``,
@@ -589,3 +592,58 @@ the random number generator's current PRNGKey value needs to be an input and
 output of this function so that MonteCarlo generates different random numbers
 in each integration.
 torchquad's RNG class has methods to set and get this PRNGKey value.
+
+The disadvantage of compilation is the additional time required to compile or
+re-compile the code,
+so if the integrate method is executed only a few times or certain arguments,
+e.g. ``N``, change often, the program may be slower overall.
+
+
+Reusing sample points
+`````````````````````
+
+With the MonteCarlo and composite Newton Cotes integrators it is possible to
+execute the methods for sample point calculation, integrand evaluation and
+result calculation separately.
+This can be helpful to obtain a speedup in situations where integration happens
+very often with the same ``integration_domain`` and ``N`` arguments.
+However, separate sample point calculation has some disadvantages:
+
+- The code is more complex.
+- The memory required for the grid points is not released after each integration.
+- With MonteCarlo the same sample points would be used for each integration, which corresponds to a fixed seed.
+
+Here is an example where we integrate two functions with Boole and use the same
+sample points for both functions:
+
+.. code:: ipython3
+
+    import torch
+    from torchquad import Boole
+
+    def integrand1(x):
+        return torch.sin(x[:, 0]) + torch.exp(x[:, 1])
+
+    def integrand2(x):
+        return torch.prod(torch.cos(x), dim=1)
+
+    # The integration domain, dimensionality and number of evaluations
+    # For the calculate_grid method we need a Tensor and not a list.
+    integration_domain = torch.Tensor([[0.0, 1.0], [-1.0, 1.0]])
+    dim = 2
+    N = 9409
+
+    # Initialize the integrator
+    integrator = Boole()
+    # Calculate sample points and grid information for the result calculation
+    grid_points, hs, n_per_dim = integrator.calculate_grid(N, integration_domain)
+
+    # Integrate the first integrand with the sample points
+    function_values, _ = integrator.evaluate_integrand(integrand1, grid_points)
+    integral1 = integrator.calculate_result(function_values, dim, n_per_dim, hs)
+
+    # Integrate the second integrand with the same sample points
+    function_values, _ = integrator.evaluate_integrand(integrand2, grid_points)
+    integral2 = integrator.calculate_result(function_values, dim, n_per_dim, hs)
+
+    print(f"Quadrature results: {integral1}, {integral2}")
