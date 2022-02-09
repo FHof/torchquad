@@ -42,6 +42,8 @@ class VEGAS(BaseIntegrator):
     ):
         """Integrates the passed function on the passed domain using VEGAS.
 
+        If the integrand output is far away from zero, i.e. lies within [a, a+c] for an absolutely big constant a and small constant c, VEGAS does not adapt well to the integrand. Shifting the integrand so that it is close to zero may improve the accuracy of the calculated integral in this case.
+
         Args:
             fn (func): The function to integrate over.
             dim (int): Dimensionality of the function to integrate.
