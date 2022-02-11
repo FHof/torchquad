@@ -46,6 +46,16 @@ Minimal working example
 To set the default logger verbosity, change the ``TORCHQUAD_LOG_LEVEL``
 environment variable; for example ``export TORCHQUAD_LOG_LEVEL=WARNING``.
 
+To use another numerical backend than torch, pass a different ``backend``
+argument to ``mc.integrate`` and change the integrand code.
+With Tensorflow it is additionally required to enable numpy behaviour:
+
+.. code:: ipython3
+
+    from tensorflow.python.ops.numpy_ops import np_config
+    np_config.enable_numpy_behavior()
+
+
 Detailed Introduction
 ---------------------
 
