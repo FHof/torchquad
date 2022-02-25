@@ -10,7 +10,7 @@ from pathlib import Path
 
 BACKEND_NAMES = {
     "jax": "JAX",
-    "numpy": "Numpy",
+    "numpy": "NumPy",
     "torch": "PyTorch",
     "tensorflow": "Tensorflow",
 }

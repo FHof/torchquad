@@ -19,6 +19,7 @@ def block_integrand(integrand, backend):
     Change the integrand to wait until its inputs and outputs are calculated
     if possible
     """
+    print("Blocking an integrand function")
     new_integrand = None
     if backend == "jax":
 
@@ -727,9 +728,9 @@ def parse_arguments():
         help="Compile the three steps of integration individually",
     )
     parser.add_argument(
-        "--no-sync-integrand",
+        "--sync-integrand",
         action="store_true",
-        help="Do not block around the integrand execution. Only affects --compile-parts without gradients",
+        help="Block around the integrand execution. Only affects --compile-parts without gradients",
     )
     parser.add_argument(
         "--calculate-gradient",
@@ -812,7 +813,7 @@ def main():
             run_func = compile_integrate(integrator, integrand, integration_domain)
             compiled_info = "integrate"
         elif args.compile_parts:
-            sync_integrand = not args.no_sync_integrand
+            sync_integrand = args.sync_integrand
             run_func = compile_parts(
                 integrator, integrand, integration_domain, sync_integrand=sync_integrand
             )
