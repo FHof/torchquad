@@ -204,10 +204,6 @@ class RNG:
             - https://numpy.org/doc/stable/reference/random/generator.html#numpy.random.Generator
             - https://www.tensorflow.org/api_docs/python/tf/random/Generator
               Only the Philox RNG guarantees consistent behaviour in Tensorflow.
-        - For torch, the RNG state is global, so if VEGAS integration uses this and
-          the integrand itself generates random numbers and changes the seed,
-          the calculated grid points may no longer be random.
-          Torch allows to fork the RNG, but this may be slow.
         - Often uniform random numbers are generated in [0, 1) instead of [0, 1].
 
             - numpy: random() is in [0, 1) and uniform() in [0, 1]
@@ -216,12 +212,15 @@ class RNG:
             - tensorflow: uniform() is in [0, 1)
     """
 
-    def __init__(self, backend, seed=None):
-        """Initialize a RNG which can be seeded and is stateful if the backend supports it
+    def __init__(self, backend, seed=None, torch_save_state=False):
+        """Initialize a RNG which can be seeded.
+
+        An initialized RNG maintains a local PRNG state with JAX, Tensorflow and NumPy, and PyTorch if torch_save_state is True.
 
         Args:
             backend (string): Numerical backend, e.g. "torch".
-            seed (int or None): Random number generation seed. If set to None, the RNG is seeded randomly if possible. Defaults to None.
+            seed (int or None, optional): Random number generation seed. If set to None, the RNG is seeded randomly. Defaults to None.
+            torch_save_state (Bool, optional): If True, maintain a separate RNG state for PyTorch. This argument can be helpful to avoid problems with integrand functions which set PyTorch's RNG seed. Unused unless backend is "torch". Defaults to False.
 
         Returns:
             An object whose "uniform" method generates uniform random numbers for the given backend
@@ -234,11 +233,45 @@ class RNG:
         elif backend == "torch":
             import torch
 
-            if seed is None:
-                torch.random.seed()
+            if torch_save_state:
+                # Set and restore the global RNG state before and after
+                # generating random numbers
+
+                if torch.cuda.is_initialized():
+                    # RNG state functions for the current CUDA device
+                    get_state = torch.cuda.get_rng_state
+                    set_state = torch.cuda.set_rng_state
+                else:
+                    # RNG state functions for the Host
+                    get_state = torch.get_rng_state
+                    set_state = torch.set_rng_state
+
+                previous_rng_state = get_state()
+                if seed is None:
+                    torch.random.seed()
+                else:
+                    torch.random.manual_seed(seed)
+                self._rng_state = get_state()
+                set_state(previous_rng_state)
+
+                def uniform_func(size, dtype):
+                    # Swap the state
+                    previous_rng_state = get_state()
+                    set_state(self._rng_state)
+                    # Generate numbers
+                    random_values = torch.rand(size=size, dtype=dtype)
+                    # Swap the state back
+                    self._rng_state = get_state()
+                    set_state(previous_rng_state)
+                    return random_values
+
+                self.uniform = uniform_func
             else:
-                torch.random.manual_seed(seed)
-            self.uniform = lambda size, dtype: torch.rand(size=size, dtype=dtype)
+                if seed is None:
+                    torch.random.seed()
+                else:
+                    torch.random.manual_seed(seed)
+                self.uniform = lambda size, dtype: torch.rand(size=size, dtype=dtype)
         elif backend == "jax":
             from jax.random import PRNGKey, split, uniform
 
