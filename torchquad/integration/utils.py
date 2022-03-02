@@ -231,47 +231,7 @@ class RNG:
             self._rng = np.random.default_rng(seed)
             self.uniform = lambda size, dtype: self._rng.random(size=size, dtype=dtype)
         elif backend == "torch":
-            import torch
-
-            if torch_save_state:
-                # Set and restore the global RNG state before and after
-                # generating random numbers
-
-                if torch.cuda.is_initialized():
-                    # RNG state functions for the current CUDA device
-                    get_state = torch.cuda.get_rng_state
-                    set_state = torch.cuda.set_rng_state
-                else:
-                    # RNG state functions for the Host
-                    get_state = torch.get_rng_state
-                    set_state = torch.set_rng_state
-
-                previous_rng_state = get_state()
-                if seed is None:
-                    torch.random.seed()
-                else:
-                    torch.random.manual_seed(seed)
-                self._rng_state = get_state()
-                set_state(previous_rng_state)
-
-                def uniform_func(size, dtype):
-                    # Swap the state
-                    previous_rng_state = get_state()
-                    set_state(self._rng_state)
-                    # Generate numbers
-                    random_values = torch.rand(size=size, dtype=dtype)
-                    # Swap the state back
-                    self._rng_state = get_state()
-                    set_state(previous_rng_state)
-                    return random_values
-
-                self.uniform = uniform_func
-            else:
-                if seed is None:
-                    torch.random.seed()
-                else:
-                    torch.random.manual_seed(seed)
-                self.uniform = lambda size, dtype: torch.rand(size=size, dtype=dtype)
+            self._set_torch_uniform(seed, torch_save_state)
         elif backend == "jax":
             from jax.random import PRNGKey, split, uniform
 
@@ -305,6 +265,56 @@ class RNG:
             self.uniform = lambda size, dtype: anp.random.uniform(
                 size=size, dtype=get_dtype_name(dtype), like=self._backend
             )
+
+    def _set_torch_uniform(self, seed, save_state):
+        """Set self.uniform to generate random numbers with PyTorch
+
+        Args:
+            seed (int or None): Random number generation seed. If set to None, the RNG is seeded randomly.
+            save_state (Bool): If True, maintain a separate RNG state.
+        """
+        import torch
+
+        if save_state:
+            # Set and restore the global RNG state before and after
+            # generating random numbers
+
+            if torch.cuda.is_initialized():
+                # RNG state functions for the current CUDA device
+                get_state = torch.cuda.get_rng_state
+                set_state = torch.cuda.set_rng_state
+            else:
+                # RNG state functions for the Host
+                get_state = torch.get_rng_state
+                set_state = torch.set_rng_state
+
+            previous_rng_state = get_state()
+            if seed is None:
+                torch.random.seed()
+            else:
+                torch.random.manual_seed(seed)
+            self._rng_state = get_state()
+            set_state(previous_rng_state)
+
+            def uniform_func(size, dtype):
+                # Swap the state
+                previous_rng_state = get_state()
+                set_state(self._rng_state)
+                # Generate numbers
+                random_values = torch.rand(size=size, dtype=dtype)
+                # Swap the state back
+                self._rng_state = get_state()
+                set_state(previous_rng_state)
+                return random_values
+
+            self.uniform = uniform_func
+        else:
+            # Use the global RNG state for random number generation
+            if seed is None:
+                torch.random.seed()
+            else:
+                torch.random.manual_seed(seed)
+            self.uniform = lambda size, dtype: torch.rand(size=size, dtype=dtype)
 
     def uniform(self, size, dtype):
         """Generate uniform random numbers in [0, 1) for the given numerical backend.
