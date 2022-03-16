@@ -7,6 +7,9 @@ import pandas as pd
 import argparse
 from pathlib import Path
 
+# Do not show top and right border in plots
+plt.rcParams["axes.spines.right"] = False
+plt.rcParams["axes.spines.top"] = False
 
 BACKEND_NAMES = {
     "jax": "JAX",

@@ -9,6 +9,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from pathlib import Path
 
+# Do not show top and right border in plots
+plt.rcParams["axes.spines.right"] = False
+plt.rcParams["axes.spines.top"] = False
+
 
 def plot_measurements(measurement_file_path, mode):
     df = pd.read_csv(measurement_file_path)
