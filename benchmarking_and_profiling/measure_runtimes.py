@@ -42,7 +42,7 @@ def block_integrand(integrand, backend):
             print("No torch synchronization for CPU")
     elif backend == "tensorflow":
         new_integrand = integrand
-        print("No Tensorflow synchronization")
+        print("No TensorFlow synchronization")
     elif backend == "numpy":
         new_integrand = integrand
     return new_integrand

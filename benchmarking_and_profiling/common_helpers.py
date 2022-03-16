@@ -12,7 +12,7 @@ def setup_tpu(backend):
     if backend == "tensorflow":
         import tensorflow as tf
 
-        print("Setting up TPU for Tensorflow")
+        print("Setting up TPU for TensorFlow")
         tpu = tf.distribute.cluster_resolver.TPUClusterResolver()
         tf.config.experimental_connect_to_cluster(tpu)
         tf.tpu.experimental.initialize_tpu_system(tpu)
@@ -20,7 +20,7 @@ def setup_tpu(backend):
         tpu_worker = tpu.cluster_spec().as_dict()["worker"]
         default_device = tf.constant(1.0).device
         print(
-            f"Tensorflow {tf.__version__}, TPU {tpu_worker}, default device {default_device}"
+            f"TensorFlow {tf.__version__}, TPU {tpu_worker}, default device {default_device}"
         )
         if "TPU" not in str(default_device):
             raise RuntimeError("TPU setup failed")

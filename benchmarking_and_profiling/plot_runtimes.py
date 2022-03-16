@@ -12,7 +12,7 @@ BACKEND_NAMES = {
     "jax": "JAX",
     "numpy": "NumPy",
     "torch": "PyTorch",
-    "tensorflow": "Tensorflow",
+    "tensorflow": "TensorFlow",
 }
 BACKEND_COLOURS = {
     "numpy": "#b3a59d",
@@ -524,7 +524,7 @@ def parse_arguments():
     )
     parser.add_argument(
         "--cuda-used",
-        help="Specify if CUDA was used for JAX, Torch and Tensorflow",
+        help="Specify if CUDA was used for JAX, Torch and TensorFlow",
         choices=[True, False, None],
         type=lambda a: {"True": True, "False": False, None: None}[a],
         default=None,
