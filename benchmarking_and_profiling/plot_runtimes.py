@@ -7,10 +7,6 @@ import pandas as pd
 import argparse
 from pathlib import Path
 
-# Do not show top and right border in plots
-plt.rcParams["axes.spines.right"] = False
-plt.rcParams["axes.spines.top"] = False
-
 BACKEND_NAMES = {
     "jax": "JAX",
     "numpy": "NumPy",
@@ -442,6 +438,13 @@ def plot_gradient_comparison(
 
 
 def make_plots(mode, measurements_csv_path, plotconf):
+    # Do not show top and right border in plots
+    plt.rcParams["axes.spines.right"] = False
+    plt.rcParams["axes.spines.top"] = False
+
+    # Bold titles
+    # ~ plt.rcParams["axes.titleweight"] = "bold"
+
     df = pd.read_csv(measurements_csv_path)
     output_folder = Path("./generated_plots")
     output_folder.mkdir(parents=True, exist_ok=True)
