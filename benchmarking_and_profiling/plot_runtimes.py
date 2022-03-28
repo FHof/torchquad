@@ -82,7 +82,10 @@ def plot_lines_ax(
                 continue
             x = x[num_invisible - 1 :]
             y = y[num_invisible - 1 :]
-        ax.plot(x, y, linestyle, markersize=3.5, c=col)
+        if plotconf.get("bigfont", False):
+            ax.plot(x, y, linestyle, markersize=2, linewidth=1, c=col)
+        else:
+            ax.plot(x, y, linestyle, markersize=3.5, c=col)
 
     ax.set_ylabel(ylabel)
     ax.set_xlabel(xlabel)
@@ -104,7 +107,7 @@ def plot_lines_ax(
     else:
         ax.set_ylim(bottom=0)
     ax.grid(True, alpha=0.3)
-    if legend_elements is not None:
+    if legend_elements is not None and not plotconf.get("legend_no", False):
         if plotconf.get("legend_outside", True):
             # Consistent location of the legend right to the plot
             ax.legend(
@@ -131,7 +134,10 @@ def plot_lines(
     output_file=None,
 ):
     """Create line plots"""
-    fig, ax = plt.subplots(figsize=(8, 6))
+    if plotconf.get("bigfont", False):
+        fig, ax = plt.subplots(figsize=(6, 4))
+    else:
+        fig, ax = plt.subplots(figsize=(8, 6))
 
     plot_lines_ax(
         ax,
@@ -564,6 +570,16 @@ def parse_arguments():
         help="Show the legend in the plot instead of right to it",
         action="store_true",
     )
+    parser.add_argument(
+        "--legend-no",
+        help="Disable the legend",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--big-text",
+        help="Increase the text size by decreasing the figure size",
+        action="store_true",
+    )
     return parser.parse_args()
 
 
@@ -579,6 +595,8 @@ def main():
             "ylim_top": args.ylim_top,
             "cuda_used": args.cuda_used,
             "legend_outside": not args.legend_inside,
+            "legend_no": args.legend_no,
+            "bigfont": args.big_text,
         },
     )
 
