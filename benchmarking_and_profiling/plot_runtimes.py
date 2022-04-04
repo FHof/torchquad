@@ -84,6 +84,8 @@ def plot_lines_ax(
             y = y[num_invisible - 1 :]
         if plotconf.get("bigfont", False):
             ax.plot(x, y, linestyle, markersize=2, linewidth=1, c=col)
+        elif plotconf.get("medfont", False):
+            ax.plot(x, y, linestyle, markersize=3, linewidth=1.5, c=col)
         else:
             ax.plot(x, y, linestyle, markersize=3.5, c=col)
 
@@ -136,6 +138,8 @@ def plot_lines(
     """Create line plots"""
     if plotconf.get("bigfont", False):
         fig, ax = plt.subplots(figsize=(6, 4))
+    if plotconf.get("medfont", False):
+        fig, ax = plt.subplots(figsize=(7, 5))
     else:
         fig, ax = plt.subplots(figsize=(8, 6))
 
@@ -580,6 +584,11 @@ def parse_arguments():
         help="Increase the text size by decreasing the figure size",
         action="store_true",
     )
+    parser.add_argument(
+        "--med-text",
+        help="Weaker version of --big-text",
+        action="store_true",
+    )
     return parser.parse_args()
 
 
@@ -597,6 +606,7 @@ def main():
             "legend_outside": not args.legend_inside,
             "legend_no": args.legend_no,
             "bigfont": args.big_text,
+            "medfont": args.med_text,
         },
     )
 

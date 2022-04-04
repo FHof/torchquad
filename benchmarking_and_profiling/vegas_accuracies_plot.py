@@ -26,7 +26,7 @@ def plot_measurements(measurement_file_path, mode):
         print(f"Generating the plot {output_file}.")
 
         fig, ax = plt.subplots()
-        ax.set_title(f"VEGAS implementation comparison, integrand {integrand_name}")
+        ax.set_title(f"VEGAS+ implementation comparison, integrand {integrand_name}")
 
         for (integrand_name, dim, implementation), df in df.groupby(
             ["integrand", "dim", "implementation"]
