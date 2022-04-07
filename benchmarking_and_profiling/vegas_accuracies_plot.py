@@ -25,7 +25,7 @@ def plot_measurements(measurement_file_path, mode):
         output_file = str(output_folder / f"vegas_{mode}_{integrand_name}.pdf")
         print(f"Generating the plot {output_file}.")
 
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(5.3, 4))
         ax.set_title(f"VEGAS+ implementation comparison, integrand {integrand_name}")
 
         for (integrand_name, dim, implementation), df in df.groupby(
@@ -51,7 +51,7 @@ def plot_measurements(measurement_file_path, mode):
                 x,
                 y,
                 c=colour,
-                s=30,
+                s=18,
                 alpha=0.7,
                 marker=marker,
                 label=f"{dim}D, {implementation}",
@@ -62,7 +62,9 @@ def plot_measurements(measurement_file_path, mode):
         ax.set_xlabel("Number of integrand evaluations")
         ax.set_xscale("log")
         ax.set_yscale("log")
-        ax.legend()
+        # ~ ax.legend()
+        # ~ ax.legend(loc="upper right")
+        ax.legend(loc="lower left")
         ax.grid(True, alpha=0.3)
 
         fig.savefig(output_file, bbox_inches="tight")
