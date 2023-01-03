@@ -56,5 +56,4 @@ jobs:
         cd torchquad/tests
         pip install pytest
         pip install pytest-error-for-skips
-        pip install --upgrade "jax[cpu]"
-        python3 -c "import tensorflow"
+        pytest -ra --error-for-skips

@@ -22,3 +22,4 @@ dependencies:
 - pip:
   - --find-links https://storage.googleapis.com/jax-releases/jax_releases.html
   - jax[cuda]>=0.2.22 # this will only work on linux. for win see e.g. https://github.com/cloudhan/jax-windows-builder
+  - jaxlib
