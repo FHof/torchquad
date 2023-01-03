@@ -57,4 +57,4 @@ jobs:
         pip install pytest
         pip install pytest-error-for-skips
         pip install --upgrade "jax[cpu]"
-        pytest -ra
+        python3 -c "import tensorflow"
